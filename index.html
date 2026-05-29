@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>claude-loop · interfaces that talk back</title>
-<meta name="description" content="Claude Code is so good at HTML it can hand you a real interface for any task. claude-loop closes the missing half of the loop: a clean way to send your clicks, edits, and choices back to the chat.">
-<link rel="stylesheet" href="loop.css">
+<title>claude-interact · interfaces that talk back</title>
+<meta name="description" content="Claude Code is so good at HTML it can hand you a real interface for any task. claude-interact closes the missing half of the loop: a clean way to send your clicks, edits, and choices back to the chat.">
+<link rel="stylesheet" href="interact.css">
 <style>
   /* page-specific layout */
   header.hero { padding: 92px 0 40px; }
@@ -70,14 +70,14 @@
 <body>
 
 <header class="hero wrap narrow">
-  <span class="eyebrow">claude-loop · a pattern + a 1-file library</span>
+  <span class="eyebrow">claude-interact · a pattern + a 1-file library</span>
   <h1>Interfaces that <span class="loopword">talk back
     <svg viewBox="0 0 320 80" aria-hidden="true"><path d="M14 58 C70 78 250 78 306 50 C320 40 300 22 250 24 C150 28 40 26 22 22"/></svg>
   </span>.</h1>
   <p class="lead">Claude Code is so good at code that it can hand you a real, purpose-built
   interface for any task. The missing half is the way back. This closes it.</p>
   <p><a class="btn" href="#gallery">Try the demos</a>
-     <a class="btn btn--ghost" href="https://github.com/sherifmak/claude-loop" target="_blank" rel="noopener">View on GitHub</a></p>
+     <a class="btn btn--ghost" href="https://github.com/sherifmak/claude-interact" target="_blank" rel="noopener">View on GitHub</a></p>
 </header>
 
 <div class="wrap narrow">
@@ -91,7 +91,7 @@
   same thing: HTML is an unreasonably good output format for Claude Code. But generating the interface
   is only half a loop. When you tweak that slider, <strong>where does the answer go?</strong></p>
 
-  <p>claude-loop is the answer: a single file you drop into any HTML Claude generates. It watches your
+  <p>claude-interact is the answer: a single file you drop into any HTML Claude generates. It watches your
   inputs and, with one click, prints a tidy <strong>receipt</strong> of everything you chose — copied to
   your clipboard, ready to paste straight back into the chat. No server, no install, no account.
   The interface talks; now it talks back.</p>
@@ -113,10 +113,10 @@
   <div class="section-head"><span class="num">02</span><h2>Taste it right here</h2></div>
   <p style="max-width:60ch">This page is loop-enabled. Change anything below, then hit the coral
   <strong>“Tear off for Claude”</strong> button in the corner. That's the exact thing every demo does.</p>
-  <div class="taste" data-loop-title="claude-loop landing — live taste">
+  <div class="taste" data-interact-title="claude-interact landing — live taste">
     <div class="row">
       <label class="f">Vibe
-        <select data-loop="Vibe">
+        <select data-interact="Vibe">
           <option>Editorial &amp; warm</option>
           <option>Brutalist &amp; raw</option>
           <option>Soft &amp; pastel</option>
@@ -124,19 +124,19 @@
         </select>
       </label>
       <label class="f">Project name
-        <input type="text" data-loop="Project name" value="Aurora" size="14">
+        <input type="text" data-interact="Project name" value="Aurora" size="14">
       </label>
       <label class="f" style="min-width:180px">Density <output id="dv" style="font-family:var(--mono);color:var(--coral-deep)">60</output>
-        <input type="range" min="0" max="100" value="60" data-loop="Density"
+        <input type="range" min="0" max="100" value="60" data-interact="Density"
                oninput="document.getElementById('dv').textContent=this.value">
       </label>
     </div>
     <div class="row" style="margin-top:6px">
       <span style="font-weight:600;font-size:.92rem">Ship with</span>
-      <div class="chip-row" data-loop-decision="Ship with">
-        <button type="button" class="chip is-active" data-loop-choice="Dark + light themes">Dark + light themes</button>
-        <button type="button" class="chip" data-loop-choice="Light only">Light only</button>
-        <button type="button" class="chip" data-loop-choice="Surprise me">Surprise me</button>
+      <div class="chip-row" data-interact-decision="Ship with">
+        <button type="button" class="chip is-active" data-interact-choice="Dark + light themes">Dark + light themes</button>
+        <button type="button" class="chip" data-interact-choice="Light only">Light only</button>
+        <button type="button" class="chip" data-interact-choice="Surprise me">Surprise me</button>
       </div>
     </div>
   </div>
@@ -180,23 +180,23 @@ build it as a single HTML file and open it in my browser.
 Make the choices <span class="a">interactive</span> — sliders, chips, drag-to-reorder
 lists, editable text, approve/revise buttons — never a wall of text.
 
-Include claude-loop so I can send my answers back to you:
-  &lt;link rel="stylesheet" href="loop.css"&gt;
-  &lt;script src="loop.js" defer&gt;&lt;/script&gt;
-Mark each control with <span class="a">data-loop="Friendly label"</span>, lists with
-<span class="a">data-loop-order</span>, and decisions with <span class="a">data-loop-decision</span>.
+Include claude-interact so I can send my answers back to you:
+  &lt;link rel="stylesheet" href="interact.css"&gt;
+  &lt;script src="interact.js" defer&gt;&lt;/script&gt;
+Mark each control with <span class="a">data-interact="Friendly label"</span>, lists with
+<span class="a">data-interact-order</span>, and decisions with <span class="a">data-interact-decision</span>.
 
 When I paste back a "claude · loop receipt", treat it as my chosen
 input and apply it to what you generated.</pre>
-  <p style="margin-top:18px"><a class="btn btn--ghost" href="https://github.com/sherifmak/claude-loop#readme" target="_blank" rel="noopener">Full docs &amp; the attribute reference →</a></p>
+  <p style="margin-top:18px"><a class="btn btn--ghost" href="https://github.com/sherifmak/claude-interact#readme" target="_blank" rel="noopener">Full docs &amp; the attribute reference →</a></p>
 </section>
 
 <footer class="wrap narrow">
   <p>Built to go with the essay <a href="https://sheriff.substack.com" target="_blank" rel="noopener">“Personal software is already here”</a>
   by Sherif Maktabi. The whole thing is one CSS file and one JS file — read them, fork them, make the loop your own.</p>
-  <p class="credit">claude-loop · MIT · github.com/sherifmak/claude-loop</p>
+  <p class="credit">claude-interact · MIT · github.com/sherifmak/claude-interact</p>
 </footer>
 
-<script src="loop.js" defer></script>
+<script src="interact.js" defer></script>
 </body>
 </html>

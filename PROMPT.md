@@ -18,27 +18,27 @@ a design, or a set of options, Claude hands you a clickable HTML interface inste
 >    - editable text fields for names, copy, and free input
 >    - approve / revise buttons for sign-off
 >
-> 3. **Include claude-loop** so I can send my answers back to you. In `<head>`:
+> 3. **Include claude-interact** so I can send my answers back to you. In `<head>`:
 >    ```html
->    <link rel="stylesheet" href="loop.css">
+>    <link rel="stylesheet" href="interact.css">
 >    ```
 >    Before `</body>`:
 >    ```html
->    <script src="loop.js" defer></script>
+>    <script src="interact.js" defer></script>
 >    ```
->    (Make sure `loop.css` and `loop.js` sit next to the HTML file, or fix the paths.)
+>    (Make sure `interact.css` and `interact.js` sit next to the HTML file, or fix the paths.)
 >
 > 4. **Mark up the controls** with these exact attributes:
->    - `data-loop="Friendly label"` on any single input — `<input>`, `<select>`, `<textarea>`, checkbox (checkboxes default to `yes`/`no`; override with `data-loop-on` / `data-loop-off`). Radio groups report the checked option.
->    - `data-loop-order="List label"` on an `<ol>`/`<ul>`. Each row gets `data-loop-item`; put the label text in a child with `data-loop-text`, and an optional `<input type="checkbox" data-loop-toggle>` — unchecked items are reported as REMOVED.
->    - `data-loop-decision="Decision label"` on a group, with `<button data-loop-choice="Approve">` for each option. The library wires single-select; the active button is the reported choice.
->    - Optionally set a panel title with `data-loop-title="…"` on a wrapper element.
+>    - `data-interact="Friendly label"` on any single input — `<input>`, `<select>`, `<textarea>`, checkbox (checkboxes default to `yes`/`no`; override with `data-interact-on` / `data-interact-off`). Radio groups report the checked option.
+>    - `data-interact-order="List label"` on an `<ol>`/`<ul>`. Each row gets `data-interact-item`; put the label text in a child with `data-interact-text`, and an optional `<input type="checkbox" data-interact-toggle>` — unchecked items are reported as REMOVED.
+>    - `data-interact-decision="Decision label"` on a group, with `<button data-interact-choice="Approve">` for each option. The library wires single-select; the active button is the reported choice.
+>    - Optionally set a panel title with `data-interact-title="…"` on a wrapper element.
 >
 > 5. **Drive it from JS** when useful:
->    - `Loop.config({ title: 'Trip planner' })` to set the receipt title.
->    - `Loop.value('Budget', '$4,200')` to register a computed value (overrides a matching label, else appends).
+>    - `Interact.config({ title: 'Trip planner' })` to set the receipt title.
+>    - `Interact.value('Budget', '$4,200')` to register a computed value (overrides a matching label, else appends).
 >
-> 6. **When I paste back a "CLAUDE · LOOP" receipt**, treat its bulleted fields as my chosen input — the decisions, the order (respecting REMOVED items), the edited text and values — and apply them to what you generated, then keep iterating. Don't re-ask what the receipt already answers.
+> 6. **When I paste back a "CLAUDE · INTERACT" receipt**, treat its bulleted fields as my chosen input — the decisions, the order (respecting REMOVED items), the edited text and values — and apply them to what you generated, then keep iterating. Don't re-ask what the receipt already answers.
 
 ---
 
@@ -51,37 +51,37 @@ a design, or a set of options, Claude hands you a clickable HTML interface inste
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Launch plan</title>
-  <link rel="stylesheet" href="loop.css">
+  <link rel="stylesheet" href="interact.css">
 </head>
 <body>
-  <main data-loop-title="Launch plan">
+  <main data-interact-title="Launch plan">
     <label>Project name
-      <input type="text" data-loop="Project name" value="Aurora">
+      <input type="text" data-interact="Project name" value="Aurora">
     </label>
 
     <label>Budget
-      <input type="range" min="0" max="10000" value="4200" data-loop="Budget">
+      <input type="range" min="0" max="10000" value="4200" data-interact="Budget">
     </label>
 
-    <ol data-loop-order="Step order">
-      <li data-loop-item>
-        <input type="checkbox" data-loop-toggle checked>
-        <span data-loop-text>Set up the repo</span>
+    <ol data-interact-order="Step order">
+      <li data-interact-item>
+        <input type="checkbox" data-interact-toggle checked>
+        <span data-interact-text>Set up the repo</span>
       </li>
-      <li data-loop-item>
-        <input type="checkbox" data-loop-toggle checked>
-        <span data-loop-text>Write the landing page</span>
+      <li data-interact-item>
+        <input type="checkbox" data-interact-toggle checked>
+        <span data-interact-text>Write the landing page</span>
       </li>
     </ol>
 
-    <div data-loop-decision="Sign-off">
-      <button type="button" data-loop-choice="Approve">Approve</button>
-      <button type="button" data-loop-choice="Revise">Revise</button>
+    <div data-interact-decision="Sign-off">
+      <button type="button" data-interact-choice="Approve">Approve</button>
+      <button type="button" data-interact-choice="Revise">Revise</button>
     </div>
   </main>
 
-  <script src="loop.js" defer></script>
-  <script>Loop.config({ title: 'Launch plan' });</script>
+  <script src="interact.js" defer></script>
+  <script>Interact.config({ title: 'Launch plan' });</script>
 </body>
 </html>
 ```

@@ -14,13 +14,13 @@ But generating the interface is only half a loop.
 
 Here's the gap. Claude builds you a beautiful plan as HTML. You open it, reorder the steps, kill two of them, rewrite a third, approve the rest. And then… what? Your changes are stuck in a browser tab. The conversation is in another window. You end up retyping your own decisions back into the chat — the exact typing the interface was supposed to save you from.
 
-So I built **claude-loop** to close it.
+So I built **claude-interact** to close it.
 
 It's one file you drop into any HTML Claude generates. It watches your inputs — the slider, the chips, the drag-to-reorder list, the edited text — and with one click prints a little **receipt**: a tidy summary of everything you chose, copied straight to your clipboard. You paste it back into the chat. The interface talks; now it talks back. No server, no install, no account. Copy, paste, done.
 
 I put up three live demos — a plan reviewer, a theme picker, and a project brief — so you can feel the round trip yourself:
 
-→ **[github.com/sherifmak/claude-loop](https://github.com/sherifmak/claude-loop)**  ·  try them live at **[sherifmak.github.io/claude-loop](https://sherifmak.github.io/claude-loop/)**
+→ **[github.com/sherifmak/claude-interact](https://github.com/sherifmak/claude-interact)**  ·  try them live at **[sherifmak.github.io/claude-interact](https://sherifmak.github.io/claude-interact/)**
 
 Open one, change things, hit the coral button, and watch your clicks become something you can hand right back to the agent.
 

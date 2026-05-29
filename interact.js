@@ -1,35 +1,35 @@
 /* ============================================================
-   claude-loop  ·  loop.js
+   claude-interact  ·  interact.js
    A zero-dependency drop-in that closes the loop between an
    HTML interface and the Claude Code chat.
 
    Drop it in:
-     <link rel="stylesheet" href="loop.css">
-     <script src="loop.js" defer></script>
+     <link rel="stylesheet" href="interact.css">
+     <script src="interact.js" defer></script>
 
    Mark up your interactive elements:
-     <input data-loop="Accent color" type="color" value="#ff4d23">
-     <select data-loop="Font">…</select>
-     <textarea data-loop="Hero copy">…</textarea>
-     <input type="checkbox" data-loop="Include analytics">
+     <input data-interact="Accent color" type="color" value="#ff4d23">
+     <select data-interact="Font">…</select>
+     <textarea data-interact="Hero copy">…</textarea>
+     <input type="checkbox" data-interact="Include analytics">
 
    Order / reorderable lists:
-     <ol data-loop-order="Step order">
-       <li data-loop-item>
-         <input type="checkbox" data-loop-toggle checked>
-         <span data-loop-text>Set up the project</span>
+     <ol data-interact-order="Step order">
+       <li data-interact-item>
+         <input type="checkbox" data-interact-toggle checked>
+         <span data-interact-text>Set up the project</span>
        </li>
      </ol>
 
    Single-choice decisions (buttons):
-     <div data-loop-decision="Decision">
-       <button data-loop-choice="Approve">Approve</button>
-       <button data-loop-choice="Revise">Revise</button>
+     <div data-interact-decision="Decision">
+       <button data-interact-choice="Approve">Approve</button>
+       <button data-interact-choice="Revise">Revise</button>
      </div>
 
    Or drive it from JS:
-     Loop.value('Budget', '$4,200');
-     Loop.config({ title: 'Trip planner' });
+     Interact.value('Budget', '$4,200');
+     Interact.config({ title: 'Trip planner' });
 
    Click the floating button → a receipt prints, the text is copied,
    you paste it back into Claude Code. That's the whole loop.
@@ -37,10 +37,10 @@
 (function () {
   'use strict';
 
-  var REPO = 'https://github.com/sherifmak/claude-loop';
+  var REPO = 'https://github.com/sherifmak/claude-interact';
 
   var cfg = {
-    title: null,                 // defaults to data-loop-title / document.title
+    title: null,                 // defaults to data-interact-title / document.title
     button: 'Tear off for Claude',
     intro: 'Feedback from the interface you generated',
     outro: 'Apply these choices to the artifact, then we can keep iterating.'
@@ -49,35 +49,35 @@
   var manual = [];               // [{label, value}] registered via JS, in order
 
   /* ---------- public API ---------- */
-  var Loop = {
-    config: function (opts) { Object.assign(cfg, opts || {}); return Loop; },
+  var Interact = {
+    config: function (opts) { Object.assign(cfg, opts || {}); return Interact; },
     value: function (label, value) {
       var hit = manual.find(function (m) { return m.label === label; });
       if (hit) hit.value = String(value);
       else manual.push({ label: label, value: String(value) });
-      return Loop;
+      return Interact;
     },
     remove: function (label) {
       manual = manual.filter(function (m) { return m.label !== label; });
-      return Loop;
+      return Interact;
     },
     collect: collect,
     format: format,
     open: openReceipt,
     copy: copyText
   };
-  window.Loop = Loop;
+  window.Interact = Interact;
 
   /* ---------- field discovery ---------- */
   function title() {
     if (cfg.title) return cfg.title;
-    var el = document.querySelector('[data-loop-title]');
-    if (el) return el.getAttribute('data-loop-title') || el.textContent.trim();
+    var el = document.querySelector('[data-interact-title]');
+    if (el) return el.getAttribute('data-interact-title') || el.textContent.trim();
     return (document.title || 'Interface').replace(/\s*[·|—-].*$/, '').trim();
   }
 
   function labelFor(el) {
-    return el.getAttribute('data-loop') || el.getAttribute('aria-label') ||
+    return el.getAttribute('data-interact') || el.getAttribute('aria-label') ||
            el.name || el.id || 'Value';
   }
 
@@ -85,8 +85,8 @@
     var t = (el.type || el.tagName).toLowerCase();
     if (t === 'checkbox') {
       return el.checked
-        ? (el.getAttribute('data-loop-on') || 'yes')
-        : (el.getAttribute('data-loop-off') || 'no');
+        ? (el.getAttribute('data-interact-on') || 'yes')
+        : (el.getAttribute('data-interact-off') || 'no');
     }
     if (el.tagName === 'SELECT') {
       var o = el.options[el.selectedIndex];
@@ -103,21 +103,21 @@
     // Walk every loop-aware node once, in DOM order, so the receipt
     // reads top-to-bottom exactly like the page.
     var nodes = document.querySelectorAll(
-      '[data-loop], [data-loop-order], [data-loop-decision]'
+      '[data-interact], [data-interact-order], [data-interact-decision]'
     );
 
     nodes.forEach(function (el) {
       // ----- ordered / toggle lists -----
-      if (el.hasAttribute('data-loop-order')) {
-        var label = el.getAttribute('data-loop-order') || 'Order';
-        var items = el.querySelectorAll('[data-loop-item]');
+      if (el.hasAttribute('data-interact-order')) {
+        var label = el.getAttribute('data-interact-order') || 'Order';
+        var items = el.querySelectorAll('[data-interact-item]');
         var lines = [];
         var n = 0;
         items.forEach(function (it) {
-          var textEl = it.querySelector('[data-loop-text]');
+          var textEl = it.querySelector('[data-interact-text]');
           var txt = textEl ? textEl.textContent.trim()
-                   : (it.getAttribute('data-loop-item') || it.textContent.trim());
-          var toggle = it.querySelector('[data-loop-toggle], input[type=checkbox]');
+                   : (it.getAttribute('data-interact-item') || it.textContent.trim());
+          var toggle = it.querySelector('[data-interact-toggle], input[type=checkbox]');
           var off = toggle && !toggle.checked;
           n++;
           lines.push('  ' + n + '. ' + txt + (off ? '   — REMOVED' : ''));
@@ -127,13 +127,13 @@
       }
 
       // ----- single-choice decision groups -----
-      if (el.hasAttribute('data-loop-decision')) {
-        var dlabel = el.getAttribute('data-loop-decision') || 'Decision';
+      if (el.hasAttribute('data-interact-decision')) {
+        var dlabel = el.getAttribute('data-interact-decision') || 'Decision';
         var active = el.querySelector(
-          '[data-loop-choice].is-active, [data-loop-choice][aria-pressed="true"]'
+          '[data-interact-choice].is-active, [data-interact-choice][aria-pressed="true"]'
         );
         var dval = active
-          ? (active.getAttribute('data-loop-choice') || active.textContent.trim())
+          ? (active.getAttribute('data-interact-choice') || active.textContent.trim())
           : '(none picked)';
         fields.push({ label: dlabel, value: dval });
         return;
@@ -149,7 +149,7 @@
         );
         fields.push({
           label: key,
-          value: checked ? (checked.getAttribute('data-loop-value') ||
+          value: checked ? (checked.getAttribute('data-interact-value') ||
                  (checked.labels && checked.labels[0] ? checked.labels[0].textContent.trim() : checked.value))
                  : '(none)'
         });
@@ -183,7 +183,7 @@
     out.push('');
     out.push(cfg.outro);
     out.push('');
-    out.push('— sent via claude-loop · ' + REPO);
+    out.push('— sent via claude-interact · ' + REPO);
     return out.join('\n');
   }
 
@@ -198,9 +198,9 @@
   function build() {
     // floating launcher
     var bar = document.createElement('div');
-    bar.className = 'loop-bar';
+    bar.className = 'interact-bar';
     var btn = document.createElement('button');
-    btn.className = 'loop-bar__btn';
+    btn.className = 'interact-bar__btn';
     btn.type = 'button';
     btn.innerHTML = LOOP_ICON + '<span>' + cfg.button + '</span>';
     btn.addEventListener('click', openReceipt);
@@ -208,24 +208,24 @@
 
     // receipt modal
     scrim = document.createElement('div');
-    scrim.className = 'loop-scrim';
+    scrim.className = 'interact-scrim';
     scrim.innerHTML =
-      '<div class="loop-receipt" role="dialog" aria-label="Feedback receipt">' +
-        '<div class="loop-receipt__head"><b>CLAUDE · LOOP</b>' +
+      '<div class="interact-receipt" role="dialog" aria-label="Feedback receipt">' +
+        '<div class="interact-receipt__head"><b>CLAUDE · INTERACT</b>' +
         '<span>round-trip receipt</span></div>' +
-        '<pre class="loop-receipt__body"></pre>' +
-        '<div class="loop-barcode"></div>' +
-        '<div class="loop-receipt__foot">' +
-          '<button class="btn btn--coral" data-loop-copy>Copy for Claude</button>' +
-          '<button class="btn btn--ghost" data-loop-close>Close</button>' +
-          '<p class="loop-receipt__hint">Paste into your Claude Code chat ⌘V</p>' +
+        '<pre class="interact-receipt__body"></pre>' +
+        '<div class="interact-barcode"></div>' +
+        '<div class="interact-receipt__foot">' +
+          '<button class="btn btn--coral" data-interact-copy>Copy for Claude</button>' +
+          '<button class="btn btn--ghost" data-interact-close>Close</button>' +
+          '<p class="interact-receipt__hint">Paste into your Claude Code chat ⌘V</p>' +
         '</div>' +
       '</div>';
-    receiptBody = scrim.querySelector('.loop-receipt__body');
+    receiptBody = scrim.querySelector('.interact-receipt__body');
 
     scrim.addEventListener('click', function (e) {
-      if (e.target === scrim || e.target.hasAttribute('data-loop-close')) close();
-      if (e.target.hasAttribute('data-loop-copy')) { copyText(); }
+      if (e.target === scrim || e.target.hasAttribute('data-interact-close')) close();
+      if (e.target.hasAttribute('data-interact-copy')) { copyText(); }
     });
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && scrim.classList.contains('is-open')) close();
@@ -233,14 +233,14 @@
 
     // toast
     toastEl = document.createElement('div');
-    toastEl.className = 'loop-toast';
+    toastEl.className = 'interact-toast';
 
     // wire decision-button single-select
-    document.querySelectorAll('[data-loop-decision]').forEach(function (group) {
+    document.querySelectorAll('[data-interact-decision]').forEach(function (group) {
       group.addEventListener('click', function (e) {
-        var c = e.target.closest('[data-loop-choice]');
+        var c = e.target.closest('[data-interact-choice]');
         if (!c || !group.contains(c)) return;
-        group.querySelectorAll('[data-loop-choice]').forEach(function (b) {
+        group.querySelectorAll('[data-interact-choice]').forEach(function (b) {
           b.classList.remove('is-active'); b.setAttribute('aria-pressed', 'false');
         });
         c.classList.add('is-active'); c.setAttribute('aria-pressed', 'true');

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New feature brief · claude-loop</title>
-<link rel="stylesheet" href="../loop.css">
+<title>New feature brief · claude-interact</title>
+<link rel="stylesheet" href="../interact.css">
 <style>
   header.head { padding: 64px 0 28px; }
   .back { font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-decoration:none;
@@ -81,7 +81,7 @@
 <body>
 
 <header class="head wrap narrow">
-  <a class="back" href="../index.html">← claude-loop</a>
+  <a class="back" href="../index.html">← claude-interact</a>
   <span class="eyebrow">Demo · choices &amp; brief</span>
   <h1>New feature brief</h1>
   <p class="lead">Claude generated this for you instead of asking eight questions in chat.
@@ -89,14 +89,14 @@
 </header>
 
 <main class="wrap narrow">
-  <form class="card brief" data-loop-title="New feature brief" onsubmit="return false">
+  <form class="card brief" data-interact-title="New feature brief" onsubmit="return false">
 
     <!-- 1 · GOAL -->
     <div class="sec">
       <div class="sec__head"><span class="sec__num">01</span><h3>The one-liner</h3></div>
       <label class="field">
         <span class="lbl">Goal in one line</span>
-        <input type="text" data-loop="Goal in one line"
+        <input type="text" data-interact="Goal in one line"
                placeholder="e.g. Let users export a board as a shareable PDF"
                value="Let users export a board as a shareable PDF">
       </label>
@@ -108,7 +108,7 @@
       <div class="grid2">
         <label class="field">
           <span class="lbl">Primary audience</span>
-          <select data-loop="Primary audience">
+          <select data-interact="Primary audience">
             <option>New users in onboarding</option>
             <option selected>Existing power users</option>
             <option>Team admins</option>
@@ -117,10 +117,10 @@
         </label>
         <div class="field">
           <span class="lbl">Priority</span>
-          <div class="chip-row" data-loop-decision="Priority">
-            <button type="button" class="chip" data-loop-choice="Low">Low</button>
-            <button type="button" class="chip is-active" data-loop-choice="Medium">Medium</button>
-            <button type="button" class="chip" data-loop-choice="High">High</button>
+          <div class="chip-row" data-interact-decision="Priority">
+            <button type="button" class="chip" data-interact-choice="Low">Low</button>
+            <button type="button" class="chip is-active" data-interact-choice="Medium">Medium</button>
+            <button type="button" class="chip" data-interact-choice="High">High</button>
           </div>
         </div>
       </div>
@@ -134,27 +134,27 @@
       <p class="sec__hint" style="margin:-6px 0 14px">Toggle what's in scope for the first cut.</p>
       <div class="toggles">
         <label class="toggle">
-          <input type="checkbox" checked data-loop="Include: Live preview" data-loop-on="yes" data-loop-off="skip">
+          <input type="checkbox" checked data-interact="Include: Live preview" data-interact-on="yes" data-interact-off="skip">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="t">Live preview <small>See it before exporting</small></span>
         </label>
         <label class="toggle">
-          <input type="checkbox" checked data-loop="Include: Custom branding" data-loop-on="yes" data-loop-off="skip">
+          <input type="checkbox" checked data-interact="Include: Custom branding" data-interact-on="yes" data-interact-off="skip">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="t">Custom branding <small>Logo &amp; colours on the page</small></span>
         </label>
         <label class="toggle">
-          <input type="checkbox" data-loop="Include: Scheduled exports" data-loop-on="yes" data-loop-off="skip">
+          <input type="checkbox" data-interact="Include: Scheduled exports" data-interact-on="yes" data-interact-off="skip">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="t">Scheduled exports <small>Auto-send on a cadence</small></span>
         </label>
         <label class="toggle">
-          <input type="checkbox" checked data-loop="Include: Shareable link" data-loop-on="yes" data-loop-off="skip">
+          <input type="checkbox" checked data-interact="Include: Shareable link" data-interact-on="yes" data-interact-off="skip">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="t">Shareable link <small>Public read-only URL</small></span>
         </label>
         <label class="toggle">
-          <input type="checkbox" data-loop="Include: Analytics" data-loop-on="yes" data-loop-off="skip">
+          <input type="checkbox" data-interact="Include: Analytics" data-interact-on="yes" data-interact-off="skip">
           <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="t">Open analytics <small>Track who viewed it</small></span>
         </label>
@@ -168,17 +168,17 @@
         <div class="field">
           <span class="lbl">Timeline (weeks)</span>
           <div class="range-wrap">
-            <input type="range" min="1" max="12" value="4" data-loop="Timeline (weeks)"
+            <input type="range" min="1" max="12" value="4" data-interact="Timeline (weeks)"
                    id="tl" oninput="syncTimeline()">
             <span class="range-val" id="tlv">4 weeks</span>
           </div>
         </div>
         <div class="field">
           <span class="lbl">Tone</span>
-          <div class="chip-row" data-loop-decision="Tone">
-            <button type="button" class="chip" data-loop-choice="Playful">Playful</button>
-            <button type="button" class="chip is-active" data-loop-choice="Neutral">Neutral</button>
-            <button type="button" class="chip" data-loop-choice="Formal">Formal</button>
+          <div class="chip-row" data-interact-decision="Tone">
+            <button type="button" class="chip" data-interact-choice="Playful">Playful</button>
+            <button type="button" class="chip is-active" data-interact-choice="Neutral">Neutral</button>
+            <button type="button" class="chip" data-interact-choice="Formal">Formal</button>
           </div>
         </div>
       </div>
@@ -189,7 +189,7 @@
       <div class="sec__head"><span class="sec__num">05</span><h3>Anything else</h3></div>
       <label class="field">
         <span class="lbl">Extra context</span>
-        <textarea data-loop="Extra context"
+        <textarea data-interact="Extra context"
           placeholder="Constraints, links, edge cases, what 'done' looks like…"></textarea>
       </label>
     </div>
@@ -197,7 +197,7 @@
   </form>
 </main>
 
-<script src="../loop.js" defer></script>
+<script src="../interact.js" defer></script>
 <script>
   function syncTimeline(){
     var n = document.getElementById('tl').value;
@@ -205,7 +205,7 @@
   }
   syncTimeline();
   window.addEventListener('DOMContentLoaded', function(){
-    if (window.Loop && Loop.config) Loop.config({ title: 'New feature brief' });
+    if (window.Interact && Interact.config) Interact.config({ title: 'New feature brief' });
   });
 </script>
 </body>

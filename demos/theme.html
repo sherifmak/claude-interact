@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Theme picker · claude-loop</title>
+<title>Theme picker · claude-interact</title>
 <meta name="description" content="A live styling panel Claude handed you. Tune the accent, mode, type, radius and spacing — watch the preview update in real time — then tear off the CSS tokens.">
-<link rel="stylesheet" href="../loop.css">
+<link rel="stylesheet" href="../interact.css">
 <style>
   header.demo-head { padding: 64px 0 28px; }
   header.demo-head .back { font-family:var(--mono); font-size:.78rem; letter-spacing:.08em;
@@ -123,7 +123,7 @@
 <body>
 
 <header class="demo-head wrap narrow">
-  <a class="back" href="../index.html">← claude-loop</a>
+  <a class="back" href="../index.html">← claude-interact</a>
   <span class="eyebrow">demo · theme picker</span>
   <h1>Style it live.</h1>
   <p class="lead">Claude generated this for you. Make it yours, then tear off the receipt —
@@ -133,13 +133,13 @@
 <div class="wrap studio">
 
   <!-- ============ CONTROL PANEL ============ -->
-  <aside class="panel" data-loop-title="Theme picker">
+  <aside class="panel" data-interact-title="Theme picker">
     <p class="panel__title">Styling controls</p>
 
     <div class="ctrl">
       <span class="lbl">Accent colour</span>
       <div class="swatch">
-        <input type="color" id="accent" data-loop="Accent" value="#ff4d23"
+        <input type="color" id="accent" data-interact="Accent" value="#ff4d23"
                aria-label="Accent colour">
         <code id="accentHex">#FF4D23</code>
       </div>
@@ -147,15 +147,15 @@
 
     <div class="ctrl">
       <span class="lbl">Mode</span>
-      <div class="chip-row" data-loop-decision="Mode">
-        <button type="button" class="chip is-active" data-loop-choice="Light">Light</button>
-        <button type="button" class="chip" data-loop-choice="Dark">Dark</button>
+      <div class="chip-row" data-interact-decision="Mode">
+        <button type="button" class="chip is-active" data-interact-choice="Light">Light</button>
+        <button type="button" class="chip" data-interact-choice="Dark">Dark</button>
       </div>
     </div>
 
     <div class="ctrl">
       <span class="lbl"><label for="font">Font pairing</label></span>
-      <select id="font" data-loop="Font pairing">
+      <select id="font" data-interact="Font pairing">
         <option value="fraunces-hanken">Fraunces + Hanken</option>
         <option value="serif">Serif editorial</option>
         <option value="grotesk">Grotesk modern</option>
@@ -165,13 +165,13 @@
 
     <div class="ctrl">
       <span class="lbl">Corner radius <span class="val" id="radiusVal">14px</span></span>
-      <input type="range" id="radius" data-loop="Radius" min="0" max="28" value="14"
+      <input type="range" id="radius" data-interact="Radius" min="0" max="28" value="14"
              aria-label="Corner radius">
     </div>
 
     <div class="ctrl">
       <span class="lbl">Density / spacing <span class="val" id="spacingVal">50</span></span>
-      <input type="range" id="spacing" data-loop="Spacing" min="0" max="100" value="50"
+      <input type="range" id="spacing" data-interact="Spacing" min="0" max="100" value="50"
              aria-label="Density and spacing">
     </div>
   </aside>
@@ -215,10 +215,10 @@
 
 </div>
 
-<script src="../loop.js"></script>
+<script src="../interact.js"></script>
 <script>
 (function () {
-  Loop.config({ title: 'Theme picker' });
+  Interact.config({ title: 'Theme picker' });
 
   var preview   = document.getElementById('preview');
   var accent    = document.getElementById('accent');
@@ -229,7 +229,7 @@
   var spacing   = document.getElementById('spacing');
   var spacingVal= document.getElementById('spacingVal');
   var tokensEl  = document.getElementById('tokens');
-  var modeGroup = document.querySelector('[data-loop-decision="Mode"]');
+  var modeGroup = document.querySelector('[data-interact-decision="Mode"]');
 
   // Mode palettes (drives preview bg + text live)
   var MODES = {
@@ -237,7 +237,7 @@
     Dark:  { bg:'#1c1714', ink:'#f6efe2', soft:'#bdb2a3', line:'#3a332c', card:'#262019' }
   };
 
-  // Font pairings (display heading / body) — only fonts already loaded by loop.css
+  // Font pairings (display heading / body) — only fonts already loaded by interact.css
   var FONTS = {
     'fraunces-hanken': {
       display: "'Fraunces', Georgia, serif",
@@ -263,7 +263,7 @@
 
   function currentMode() {
     var active = modeGroup.querySelector('.is-active');
-    return active ? active.getAttribute('data-loop-choice') : 'Light';
+    return active ? active.getAttribute('data-interact-choice') : 'Light';
   }
 
   function pad(spaceVal) {
@@ -318,7 +318,7 @@
       .replace(/(--[\w-]+)(:)/g, '<span class="k">$1</span>$2');
 
     // hand the raw CSS to the receipt
-    Loop.value('CSS tokens', '\n' + css);
+    Interact.value('CSS tokens', '\n' + css);
   }
 
   // wire every control
@@ -326,9 +326,9 @@
   font.addEventListener('change', render);
   radius.addEventListener('input', render);
   spacing.addEventListener('input', render);
-  // mode chips: loop.js toggles .is-active on click; re-render just after
+  // mode chips: interact.js toggles .is-active on click; re-render just after
   modeGroup.addEventListener('click', function (e) {
-    if (e.target.closest('[data-loop-choice]')) setTimeout(render, 0);
+    if (e.target.closest('[data-interact-choice]')) setTimeout(render, 0);
   });
 
   render();

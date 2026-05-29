@@ -1,5 +1,5 @@
 /* ============================================================
-   claude-loop — shared design system
+   claude-interact — shared design system
    Aesthetic: editorial paper + ink, single coral signal accent.
    Fonts: Fraunces (display) · Hanken Grotesk (UI) · JetBrains Mono (machine)
    ============================================================ */
@@ -103,15 +103,15 @@ a:hover { color: var(--coral); }
 }
 
 /* ============================================================
-   THE LOOP WIDGET  (injected by loop.js)
+   THE LOOP WIDGET  (injected by interact.js)
    The "tear-off receipt" you hand back to Claude.
    ============================================================ */
 
-.loop-bar {
+.interact-bar {
   position: fixed; right: 22px; bottom: 22px; z-index: 9000;
   display: flex; align-items: center; gap: 12px;
 }
-.loop-bar__btn {
+.interact-bar__btn {
   font-family: var(--ui); font-weight: 700; font-size: .95rem;
   background: var(--coral); color: #fff; border: 2px solid var(--ink);
   border-radius: 100px; padding: .8em 1.3em; cursor: pointer;
@@ -119,20 +119,20 @@ a:hover { color: var(--coral); }
   box-shadow: 4px 4px 0 var(--ink);
   transition: transform .12s, box-shadow .12s;
 }
-.loop-bar__btn:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 var(--ink); }
-.loop-bar__btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
-.loop-bar__btn svg { width: 18px; height: 18px; }
+.interact-bar__btn:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 var(--ink); }
+.interact-bar__btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.interact-bar__btn svg { width: 18px; height: 18px; }
 
 /* the receipt modal */
-.loop-scrim {
+.interact-scrim {
   position: fixed; inset: 0; z-index: 9500; display: none;
   background: rgba(28,23,20,.45); backdrop-filter: blur(3px);
   align-items: center; justify-content: center; padding: 24px;
 }
-.loop-scrim.is-open { display: flex; animation: loop-fade .2s ease; }
+.interact-scrim.is-open { display: flex; animation: loop-fade .2s ease; }
 @keyframes loop-fade { from { opacity: 0; } to { opacity: 1; } }
 
-.loop-receipt {
+.interact-receipt {
   --tear: 12px;
   position: relative; width: min(440px, 100%); max-height: 84vh; overflow: auto;
   background: #fffdf8; color: var(--ink);
@@ -155,31 +155,31 @@ a:hover { color: var(--coral); }
   from { transform: translateY(-14px) scaleY(.4); opacity: 0; }
   to   { transform: translateY(0) scaleY(1); opacity: 1; }
 }
-.loop-receipt__head {
+.interact-receipt__head {
   text-align: center; border-bottom: 2px dashed var(--line); padding-bottom: 14px; margin-bottom: 14px;
 }
-.loop-receipt__head b { display:block; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; }
-.loop-receipt__head span { color: var(--ink-faint); font-size: 11px; letter-spacing: .1em; }
-.loop-receipt pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono); }
-.loop-receipt__foot {
+.interact-receipt__head b { display:block; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; }
+.interact-receipt__head span { color: var(--ink-faint); font-size: 11px; letter-spacing: .1em; }
+.interact-receipt pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono); }
+.interact-receipt__foot {
   margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--line);
   display: flex; gap: 10px; flex-direction: column;
 }
-.loop-receipt__foot .btn { justify-content: center; width: 100%; }
-.loop-receipt__hint { text-align:center; color: var(--ink-faint); font-size: 11px; margin: 2px 0 0; }
-.loop-barcode { height: 34px; margin: 14px 0 2px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 9px); opacity:.85;}
+.interact-receipt__foot .btn { justify-content: center; width: 100%; }
+.interact-receipt__hint { text-align:center; color: var(--ink-faint); font-size: 11px; margin: 2px 0 0; }
+.interact-barcode { height: 34px; margin: 14px 0 2px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 9px); opacity:.85;}
 
-.loop-toast {
+.interact-toast {
   position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
   background: var(--ink); color: var(--paper); font-family: var(--ui); font-weight: 600;
   padding: .8em 1.3em; border-radius: 100px; z-index: 9600; opacity: 0; pointer-events: none;
   transition: opacity .25s, transform .25s; box-shadow: 0 10px 30px -10px rgba(0,0,0,.6);
 }
-.loop-toast.is-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.interact-toast.is-on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 @media (max-width: 560px) {
-  .loop-bar { right: 12px; bottom: 12px; left: 12px; }
-  .loop-bar__btn { width: 100%; justify-content: center; }
+  .interact-bar { right: 12px; bottom: 12px; left: 12px; }
+  .interact-bar__btn { width: 100%; justify-content: center; }
 }
 
 /* reduced motion */
