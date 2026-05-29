@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New feature brief · claude-loop</title>
+<link rel="stylesheet" href="../loop.css">
+<style>
+  header.head { padding: 64px 0 28px; }
+  .back { font-family:var(--mono); font-size:.78rem; letter-spacing:.08em; text-decoration:none;
+    color:var(--ink-soft); display:inline-block; margin-bottom:28px; }
+  .back:hover { color:var(--coral-deep); }
+  .head .lead { max-width:46ch; }
+
+  .brief { margin: 8px 0 60px; }
+
+  /* sections inside the card */
+  .sec { padding: 22px 0; border-top: 1.5px solid var(--line-soft); }
+  .sec:first-of-type { border-top: none; padding-top: 4px; }
+  .sec__head { display:flex; align-items:baseline; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .sec__num { font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; color:var(--coral-deep);
+    font-weight:700; text-transform:uppercase; }
+  .sec h3 { margin:0; }
+  .sec__hint { font-size:.86rem; color:var(--ink-faint); margin:0; }
+
+  /* fields */
+  .field { display:flex; flex-direction:column; gap:7px; }
+  .field > .lbl { font-weight:600; font-size:.92rem; }
+  input[type=text], select, textarea {
+    font-family:var(--ui); font-size:.98rem; padding:.62em .8em;
+    border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); width:100%;
+    transition: border-color .12s, box-shadow .12s;
+  }
+  input[type=text]:focus, select:focus, textarea:focus {
+    outline:none; border-color:var(--ink); box-shadow:3px 3px 0 var(--coral);
+  }
+  textarea { resize:vertical; min-height:90px; line-height:1.55; }
+  select { appearance:none; background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231c1714' stroke-width='1.6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right .9em center; padding-right:2.2em; }
+
+  /* chips (priority + tone) */
+  .chip-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { border:1.5px solid var(--ink); background:#fff; border-radius:100px; padding:.45em 1em;
+    font-weight:600; font-size:.88rem; cursor:pointer; font-family:var(--ui); color:var(--ink);
+    transition: transform .1s, box-shadow .1s, background .12s; }
+  .chip:hover { transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--line); }
+  .chip.is-active { background:var(--coral); color:#fff; border-color:var(--coral); box-shadow:3px 3px 0 var(--ink); }
+  .chip.is-active:hover { box-shadow:4px 4px 0 var(--ink); }
+
+  /* range */
+  .range-wrap { display:flex; align-items:center; gap:16px; }
+  input[type=range] { accent-color:var(--coral); flex:1; min-width:140px; }
+  .range-val { font-family:var(--mono); font-weight:700; color:var(--ink);
+    border:1.5px solid var(--ink); border-radius:8px; padding:.3em .7em; min-width:5.2em; text-align:center;
+    background:var(--coral-wash); white-space:nowrap; }
+
+  /* include toggle cards */
+  .toggles { display:grid; gap:10px; grid-template-columns:1fr; }
+  @media(min-width:560px){ .toggles{ grid-template-columns:repeat(2,1fr);} }
+  .toggle { display:flex; align-items:center; gap:12px; cursor:pointer;
+    border:1.5px solid var(--line); border-radius:11px; padding:.7em .85em; background:#fff;
+    transition: border-color .12s, box-shadow .12s, background .12s; user-select:none; }
+  .toggle:hover { border-color:var(--ink); }
+  .toggle input { position:absolute; opacity:0; width:0; height:0; }
+  .toggle .box { flex:none; width:22px; height:22px; border:1.5px solid var(--ink); border-radius:6px;
+    display:grid; place-items:center; background:#fff; transition: background .12s; }
+  .toggle .box svg { width:14px; height:14px; opacity:0; transform:scale(.6); transition:opacity .12s, transform .12s; }
+  .toggle .t { font-weight:600; font-size:.92rem; line-height:1.3; }
+  .toggle .t small { display:block; font-weight:400; font-size:.78rem; color:var(--ink-faint); }
+  .toggle:has(input:checked) { border-color:var(--ink); background:var(--coral-wash); box-shadow:3px 3px 0 var(--coral); }
+  .toggle:has(input:checked) .box { background:var(--coral); border-color:var(--coral); }
+  .toggle:has(input:checked) .box svg { opacity:1; transform:scale(1); }
+  .toggle:has(input:focus-visible) { outline:2px solid var(--coral-deep); outline-offset:2px; }
+
+  /* two-up rows that wrap on mobile */
+  .grid2 { display:grid; gap:18px 22px; grid-template-columns:1fr; }
+  @media(min-width:560px){ .grid2{ grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="head wrap narrow">
+  <a class="back" href="../index.html">← claude-loop</a>
+  <span class="eyebrow">Demo · choices &amp; brief</span>
+  <h1>New feature brief</h1>
+  <p class="lead">Claude generated this for you instead of asking eight questions in chat.
+  Make it yours, then tear off the receipt.</p>
+</header>
+
+<main class="wrap narrow">
+  <form class="card brief" data-loop-title="New feature brief" onsubmit="return false">
+
+    <!-- 1 · GOAL -->
+    <div class="sec">
+      <div class="sec__head"><span class="sec__num">01</span><h3>The one-liner</h3></div>
+      <label class="field">
+        <span class="lbl">Goal in one line</span>
+        <input type="text" data-loop="Goal in one line"
+               placeholder="e.g. Let users export a board as a shareable PDF"
+               value="Let users export a board as a shareable PDF">
+      </label>
+    </div>
+
+    <!-- 2 · WHO + HOW URGENT -->
+    <div class="sec">
+      <div class="sec__head"><span class="sec__num">02</span><h3>Who &amp; how urgent</h3></div>
+      <div class="grid2">
+        <label class="field">
+          <span class="lbl">Primary audience</span>
+          <select data-loop="Primary audience">
+            <option>New users in onboarding</option>
+            <option selected>Existing power users</option>
+            <option>Team admins</option>
+            <option>External / shared viewers</option>
+          </select>
+        </label>
+        <div class="field">
+          <span class="lbl">Priority</span>
+          <div class="chip-row" data-loop-decision="Priority">
+            <button type="button" class="chip" data-loop-choice="Low">Low</button>
+            <button type="button" class="chip is-active" data-loop-choice="Medium">Medium</button>
+            <button type="button" class="chip" data-loop-choice="High">High</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · INCLUDE -->
+    <div class="sec">
+      <div class="sec__head">
+        <span class="sec__num">03</span><h3>What to include</h3>
+      </div>
+      <p class="sec__hint" style="margin:-6px 0 14px">Toggle what's in scope for the first cut.</p>
+      <div class="toggles">
+        <label class="toggle">
+          <input type="checkbox" checked data-loop="Include: Live preview" data-loop-on="yes" data-loop-off="skip">
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="t">Live preview <small>See it before exporting</small></span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" checked data-loop="Include: Custom branding" data-loop-on="yes" data-loop-off="skip">
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="t">Custom branding <small>Logo &amp; colours on the page</small></span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" data-loop="Include: Scheduled exports" data-loop-on="yes" data-loop-off="skip">
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="t">Scheduled exports <small>Auto-send on a cadence</small></span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" checked data-loop="Include: Shareable link" data-loop-on="yes" data-loop-off="skip">
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="t">Shareable link <small>Public read-only URL</small></span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" data-loop="Include: Analytics" data-loop-on="yes" data-loop-off="skip">
+          <span class="box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8.5l3.5 3.5L14 3.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="t">Open analytics <small>Track who viewed it</small></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 4 · TIMELINE + TONE -->
+    <div class="sec">
+      <div class="sec__head"><span class="sec__num">04</span><h3>Timeline &amp; tone</h3></div>
+      <div class="grid2">
+        <div class="field">
+          <span class="lbl">Timeline (weeks)</span>
+          <div class="range-wrap">
+            <input type="range" min="1" max="12" value="4" data-loop="Timeline (weeks)"
+                   id="tl" oninput="syncTimeline()">
+            <span class="range-val" id="tlv">4 weeks</span>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lbl">Tone</span>
+          <div class="chip-row" data-loop-decision="Tone">
+            <button type="button" class="chip" data-loop-choice="Playful">Playful</button>
+            <button type="button" class="chip is-active" data-loop-choice="Neutral">Neutral</button>
+            <button type="button" class="chip" data-loop-choice="Formal">Formal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 · NOTES -->
+    <div class="sec">
+      <div class="sec__head"><span class="sec__num">05</span><h3>Anything else</h3></div>
+      <label class="field">
+        <span class="lbl">Extra context</span>
+        <textarea data-loop="Extra context"
+          placeholder="Constraints, links, edge cases, what 'done' looks like…"></textarea>
+      </label>
+    </div>
+
+  </form>
+</main>
+
+<script src="../loop.js" defer></script>
+<script>
+  function syncTimeline(){
+    var n = document.getElementById('tl').value;
+    document.getElementById('tlv').textContent = n + (n === '1' ? ' week' : ' weeks');
+  }
+  syncTimeline();
+  window.addEventListener('DOMContentLoaded', function(){
+    if (window.Loop && Loop.config) Loop.config({ title: 'New feature brief' });
+  });
+</script>
+</body>
+</html>

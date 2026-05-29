@@ -1,0 +1,189 @@
+/* ============================================================
+   claude-loop — shared design system
+   Aesthetic: editorial paper + ink, single coral signal accent.
+   Fonts: Fraunces (display) · Hanken Grotesk (UI) · JetBrains Mono (machine)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..900&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* paper + ink */
+  --paper:      #f3ece0;
+  --paper-2:    #ece3d4;
+  --card:       #fbf7ef;
+  --ink:        #1c1714;
+  --ink-soft:   #4a423b;
+  --ink-faint:  #8c8175;
+  --line:       #d9cdb8;
+  --line-soft:  #e6dccb;
+
+  /* signal accent */
+  --coral:      #ff4d23;
+  --coral-deep: #d63b14;
+  --coral-wash: #ffe7dd;
+  --mark:       #ffd9a0; /* highlighter */
+
+  /* type */
+  --display: 'Fraunces', Georgia, serif;
+  --ui:      'Hanken Grotesk', system-ui, sans-serif;
+  --mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --maxw: 940px;
+  --radius: 14px;
+  --shadow: 0 1px 0 var(--line), 0 18px 40px -28px rgba(28,23,20,.5);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--ui);
+  color: var(--ink);
+  background-color: var(--paper);
+  /* subtle paper grain via layered gradients */
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.5), transparent 30%),
+    radial-gradient(circle at 88% 8%, rgba(255,77,35,.05), transparent 32%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- layout ---------- */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+.narrow { max-width: 660px; }
+
+/* ---------- type ---------- */
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.05; letter-spacing: -.02em; margin: 0 0 .4em; }
+h1 { font-size: clamp(2.6rem, 7vw, 4.6rem); font-weight: 540; font-optical-sizing: auto; }
+h2 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+h3 { font-size: 1.25rem; letter-spacing: -.01em; }
+p  { margin: 0 0 1.1em; max-width: 62ch; }
+a  { color: var(--coral-deep); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--coral); }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--coral-deep); font-weight: 500; margin: 0 0 1.4em;
+  display: inline-flex; align-items: center; gap: .6em;
+}
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--coral); }
+
+.lead { font-size: 1.18rem; color: var(--ink-soft); }
+.mark { background: linear-gradient(180deg, transparent 58%, var(--mark) 58%); padding: 0 .08em; }
+
+/* ---------- buttons ---------- */
+.btn {
+  font-family: var(--ui); font-weight: 600; font-size: .95rem;
+  border: 1.5px solid var(--ink); background: var(--ink); color: var(--paper);
+  padding: .7em 1.25em; border-radius: 100px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .55em;
+  transition: transform .12s ease, box-shadow .12s ease, background .15s;
+  box-shadow: 3px 3px 0 var(--coral);
+}
+.btn:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--coral); }
+.btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--coral); }
+.btn--ghost { background: transparent; color: var(--ink); box-shadow: 3px 3px 0 var(--line); }
+.btn--ghost:hover { box-shadow: 5px 5px 0 var(--line); }
+.btn--coral { background: var(--coral); border-color: var(--coral); color: #fff; box-shadow: 3px 3px 0 var(--ink); }
+
+/* ---------- cards / panels ---------- */
+.card {
+  background: var(--card); border: 1.5px solid var(--ink); border-radius: var(--radius);
+  padding: 26px; box-shadow: var(--shadow);
+}
+.tag {
+  font-family: var(--mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 100px; padding: .25em .7em; color: var(--ink-soft);
+  display: inline-block;
+}
+
+/* ============================================================
+   THE LOOP WIDGET  (injected by loop.js)
+   The "tear-off receipt" you hand back to Claude.
+   ============================================================ */
+
+.loop-bar {
+  position: fixed; right: 22px; bottom: 22px; z-index: 9000;
+  display: flex; align-items: center; gap: 12px;
+}
+.loop-bar__btn {
+  font-family: var(--ui); font-weight: 700; font-size: .95rem;
+  background: var(--coral); color: #fff; border: 2px solid var(--ink);
+  border-radius: 100px; padding: .8em 1.3em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: .6em;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform .12s, box-shadow .12s;
+}
+.loop-bar__btn:hover { transform: translate(-1px,-1px); box-shadow: 6px 6px 0 var(--ink); }
+.loop-bar__btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+.loop-bar__btn svg { width: 18px; height: 18px; }
+
+/* the receipt modal */
+.loop-scrim {
+  position: fixed; inset: 0; z-index: 9500; display: none;
+  background: rgba(28,23,20,.45); backdrop-filter: blur(3px);
+  align-items: center; justify-content: center; padding: 24px;
+}
+.loop-scrim.is-open { display: flex; animation: loop-fade .2s ease; }
+@keyframes loop-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.loop-receipt {
+  --tear: 12px;
+  position: relative; width: min(440px, 100%); max-height: 84vh; overflow: auto;
+  background: #fffdf8; color: var(--ink);
+  font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  padding: 30px 28px 26px;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,.55);
+  /* perforated top + bottom tear edges */
+  -webkit-mask:
+    radial-gradient(var(--tear) at 50% 0, transparent 98%, #000) 0 0/24px 100% repeat-x,
+    radial-gradient(var(--tear) at 50% 100%, transparent 98%, #000) 0 100%/24px 100% repeat-x,
+    linear-gradient(#000,#000) 0 var(--tear)/100% calc(100% - var(--tear)*2) no-repeat;
+          mask:
+    radial-gradient(var(--tear) at 50% 0, transparent 98%, #000) 0 0/24px 100% repeat-x,
+    radial-gradient(var(--tear) at 50% 100%, transparent 98%, #000) 0 100%/24px 100% repeat-x,
+    linear-gradient(#000,#000) 0 var(--tear)/100% calc(100% - var(--tear)*2) no-repeat;
+  animation: loop-print .42s cubic-bezier(.2,.9,.25,1);
+  transform-origin: top center;
+}
+@keyframes loop-print {
+  from { transform: translateY(-14px) scaleY(.4); opacity: 0; }
+  to   { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+.loop-receipt__head {
+  text-align: center; border-bottom: 2px dashed var(--line); padding-bottom: 14px; margin-bottom: 14px;
+}
+.loop-receipt__head b { display:block; font-size: 15px; letter-spacing: .12em; text-transform: uppercase; }
+.loop-receipt__head span { color: var(--ink-faint); font-size: 11px; letter-spacing: .1em; }
+.loop-receipt pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono); }
+.loop-receipt__foot {
+  margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--line);
+  display: flex; gap: 10px; flex-direction: column;
+}
+.loop-receipt__foot .btn { justify-content: center; width: 100%; }
+.loop-receipt__hint { text-align:center; color: var(--ink-faint); font-size: 11px; margin: 2px 0 0; }
+.loop-barcode { height: 34px; margin: 14px 0 2px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 9px); opacity:.85;}
+
+.loop-toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--paper); font-family: var(--ui); font-weight: 600;
+  padding: .8em 1.3em; border-radius: 100px; z-index: 9600; opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s; box-shadow: 0 10px 30px -10px rgba(0,0,0,.6);
+}
+.loop-toast.is-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 560px) {
+  .loop-bar { right: 12px; bottom: 12px; left: 12px; }
+  .loop-bar__btn { width: 100%; justify-content: center; }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+}

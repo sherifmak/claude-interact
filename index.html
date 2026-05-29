@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>claude-loop · interfaces that talk back</title>
+<meta name="description" content="Claude Code is so good at HTML it can hand you a real interface for any task. claude-loop closes the missing half of the loop: a clean way to send your clicks, edits, and choices back to the chat.">
+<link rel="stylesheet" href="loop.css">
+<style>
+  /* page-specific layout */
+  header.hero { padding: 92px 0 40px; }
+  .hero h1 { margin-top: .15em; }
+  .hero .lead { max-width: 40ch; }
+  .loopword { position: relative; white-space: nowrap; }
+  .loopword svg { position:absolute; left:-6%; top:-12%; width:112%; height:130%; pointer-events:none; }
+  .loopword svg path { fill:none; stroke:var(--coral); stroke-width:3; stroke-linecap:round;
+    stroke-dasharray: 620; stroke-dashoffset: 620; animation: draw 1.1s .5s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  section { padding: 46px 0; border-top: 1.5px solid var(--line); }
+  .section-head { display:flex; align-items:baseline; gap:14px; margin-bottom: 26px; flex-wrap:wrap;}
+  .num { font-family:var(--mono); color:var(--coral-deep); font-weight:700; font-size:.9rem; }
+
+  /* the loop diagram */
+  .loop-flow { display:grid; grid-template-columns: 1fr; gap:14px; counter-reset: s; }
+  @media (min-width:760px){ .loop-flow{ grid-template-columns: repeat(4,1fr);} }
+  .loop-step { background:var(--card); border:1.5px solid var(--ink); border-radius:var(--radius);
+    padding:20px 18px; position:relative; }
+  .loop-step .k { font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--ink-faint);
+    text-transform:uppercase; display:block; margin-bottom:8px; }
+  .loop-step b { font-family:var(--display); font-size:1.15rem; display:block; }
+  .loop-step.is-back { background: var(--coral-wash); border-color: var(--coral-deep); }
+
+  /* live taste strip */
+  .taste { background:var(--card); border:1.5px solid var(--ink); border-radius:var(--radius);
+    padding:26px; box-shadow:var(--shadow); }
+  .taste .row { display:flex; flex-wrap:wrap; gap:18px 28px; align-items:center; margin-bottom:6px;}
+  .taste label.f { display:flex; flex-direction:column; gap:6px; font-weight:600; font-size:.92rem; }
+  .taste select, .taste input[type=text]{ font-family:var(--ui); font-size:.95rem; padding:.55em .7em;
+    border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); }
+  .taste input[type=range]{ accent-color: var(--coral); }
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ border:1.5px solid var(--ink); background:#fff; border-radius:100px; padding:.4em .9em;
+    font-weight:600; font-size:.85rem; cursor:pointer; font-family:var(--ui); color:var(--ink);}
+  .chip.is-active{ background:var(--coral); color:#fff; border-color:var(--coral);}
+
+  /* gallery */
+  .gallery{ display:grid; gap:18px; grid-template-columns:1fr; }
+  @media(min-width:720px){ .gallery{ grid-template-columns:repeat(3,1fr);} }
+  .demo-card{ display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit;
+    background:var(--card); border:1.5px solid var(--ink); border-radius:var(--radius); padding:22px;
+    box-shadow:var(--shadow); transition:transform .14s, box-shadow .14s; }
+  .demo-card:hover{ transform:translate(-2px,-2px); box-shadow:6px 8px 0 var(--coral); }
+  .demo-card .glyph{ font-family:var(--mono); font-size:1.6rem; }
+  .demo-card h3{ margin:0; }
+  .demo-card p{ margin:0; color:var(--ink-soft); font-size:.92rem; }
+  .demo-card .go{ margin-top:auto; font-family:var(--mono); font-size:.78rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--coral-deep); }
+
+  pre.code{ background:#1c1714; color:#f3ece0; font-family:var(--mono); font-size:.82rem; line-height:1.65;
+    padding:20px 22px; border-radius:12px; overflow:auto; border:1.5px solid var(--ink); position:relative;}
+  pre.code .c{ color:#9a8f80; }
+  pre.code .a{ color:#ffb38a; }
+
+  footer{ padding:54px 0 80px; border-top:1.5px solid var(--line); color:var(--ink-soft);}
+  footer a{ font-weight:600; }
+  .credit{ font-family:var(--mono); font-size:.74rem; letter-spacing:.1em; color:var(--ink-faint); }
+</style>
+</head>
+<body>
+
+<header class="hero wrap narrow">
+  <span class="eyebrow">claude-loop · a pattern + a 1-file library</span>
+  <h1>Interfaces that <span class="loopword">talk back
+    <svg viewBox="0 0 320 80" aria-hidden="true"><path d="M14 58 C70 78 250 78 306 50 C320 40 300 22 250 24 C150 28 40 26 22 22"/></svg>
+  </span>.</h1>
+  <p class="lead">Claude Code is so good at code that it can hand you a real, purpose-built
+  interface for any task. The missing half is the way back. This closes it.</p>
+  <p><a class="btn" href="#gallery">Try the demos</a>
+     <a class="btn btn--ghost" href="https://github.com/sherifmak/claude-loop" target="_blank" rel="noopener">View on GitHub</a></p>
+</header>
+
+<div class="wrap narrow">
+  <p>For two years every conversation with an AI has been squeezed through a chat box. You type a
+  paragraph hoping it lands; it types a paragraph back. But a paragraph is a terrible way to pick a
+  colour, reorder a plan, or approve three of five steps. <span class="mark">Clicking beats typing for
+  structured input</span> — that's the entire reason we left command lines behind in the 80s.</p>
+
+  <p>Now the agent can simply <em>build the right control for the job</em> — a slider, a set of chips,
+  a drag-to-reorder list — render it as plain HTML, and open it in your browser. Anthropic noticed the
+  same thing: HTML is an unreasonably good output format for Claude Code. But generating the interface
+  is only half a loop. When you tweak that slider, <strong>where does the answer go?</strong></p>
+
+  <p>claude-loop is the answer: a single file you drop into any HTML Claude generates. It watches your
+  inputs and, with one click, prints a tidy <strong>receipt</strong> of everything you chose — copied to
+  your clipboard, ready to paste straight back into the chat. No server, no install, no account.
+  The interface talks; now it talks back.</p>
+</div>
+
+<!-- THE LOOP -->
+<section class="wrap">
+  <div class="section-head"><span class="num">01</span><h2>The loop, in four moves</h2></div>
+  <div class="loop-flow">
+    <div class="loop-step"><span class="k">you ask</span><b>“Show me the plan”</b><p style="margin:8px 0 0;font-size:.9rem;color:var(--ink-soft)">Plain language, like always.</p></div>
+    <div class="loop-step"><span class="k">claude builds</span><b>an HTML interface</b><p style="margin:8px 0 0;font-size:.9rem;color:var(--ink-soft)">Opens in your browser. Real controls.</p></div>
+    <div class="loop-step"><span class="k">you decide</span><b>by clicking</b><p style="margin:8px 0 0;font-size:.9rem;color:var(--ink-soft)">Reorder, edit, pick, approve.</p></div>
+    <div class="loop-step is-back"><span class="k">it talks back</span><b>a paste-able receipt</b><p style="margin:8px 0 0;font-size:.9rem;color:var(--ink-soft)">One click → clipboard → chat.</p></div>
+  </div>
+</section>
+
+<!-- LIVE TASTE -->
+<section class="wrap">
+  <div class="section-head"><span class="num">02</span><h2>Taste it right here</h2></div>
+  <p style="max-width:60ch">This page is loop-enabled. Change anything below, then hit the coral
+  <strong>“Tear off for Claude”</strong> button in the corner. That's the exact thing every demo does.</p>
+  <div class="taste" data-loop-title="claude-loop landing — live taste">
+    <div class="row">
+      <label class="f">Vibe
+        <select data-loop="Vibe">
+          <option>Editorial &amp; warm</option>
+          <option>Brutalist &amp; raw</option>
+          <option>Soft &amp; pastel</option>
+          <option>Retro-futuristic</option>
+        </select>
+      </label>
+      <label class="f">Project name
+        <input type="text" data-loop="Project name" value="Aurora" size="14">
+      </label>
+      <label class="f" style="min-width:180px">Density <output id="dv" style="font-family:var(--mono);color:var(--coral-deep)">60</output>
+        <input type="range" min="0" max="100" value="60" data-loop="Density"
+               oninput="document.getElementById('dv').textContent=this.value">
+      </label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <span style="font-weight:600;font-size:.92rem">Ship with</span>
+      <div class="chip-row" data-loop-decision="Ship with">
+        <button type="button" class="chip is-active" data-loop-choice="Dark + light themes">Dark + light themes</button>
+        <button type="button" class="chip" data-loop-choice="Light only">Light only</button>
+        <button type="button" class="chip" data-loop-choice="Surprise me">Surprise me</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="wrap" id="gallery">
+  <div class="section-head"><span class="num">03</span><h2>Three interfaces, one loop</h2></div>
+  <div class="gallery">
+    <a class="demo-card" href="demos/plan.html">
+      <span class="glyph">⠿</span>
+      <h3>Plan reviewer</h3>
+      <p>Claude drafts a plan as HTML. Reorder steps, edit them inline, drop the ones you don't want, approve.</p>
+      <span class="go">open demo →</span>
+    </a>
+    <a class="demo-card" href="demos/theme.html">
+      <span class="glyph">◐</span>
+      <h3>Theme picker</h3>
+      <p>A live styling panel — colour, type, spacing, radius — previewing in real time. Send back the tokens you like.</p>
+      <span class="go">open demo →</span>
+    </a>
+    <a class="demo-card" href="demos/choices.html">
+      <span class="glyph">☰</span>
+      <h3>Choices &amp; brief</h3>
+      <p>The everyday case: a structured brief with chips, ranges, toggles and free text, instead of a wall of questions.</p>
+      <span class="go">open demo →</span>
+    </a>
+  </div>
+</section>
+
+<!-- USE IT -->
+<section class="wrap">
+  <div class="section-head"><span class="num">04</span><h2>Use it with Claude Code</h2></div>
+  <p style="max-width:62ch">Paste this into your Claude Code session once. From then on, when you ask for a
+  plan, a design, or a set of choices, Claude will hand you a loop-enabled interface — and you can send
+  your answers straight back.</p>
+  <pre class="code"><span class="c"># Give this to Claude Code (also in PROMPT.md)</span>
+When I ask you to show me a plan, a design, or a set of options,
+build it as a single HTML file and open it in my browser.
+
+Make the choices <span class="a">interactive</span> — sliders, chips, drag-to-reorder
+lists, editable text, approve/revise buttons — never a wall of text.
+
+Include claude-loop so I can send my answers back to you:
+  &lt;link rel="stylesheet" href="loop.css"&gt;
+  &lt;script src="loop.js" defer&gt;&lt;/script&gt;
+Mark each control with <span class="a">data-loop="Friendly label"</span>, lists with
+<span class="a">data-loop-order</span>, and decisions with <span class="a">data-loop-decision</span>.
+
+When I paste back a "claude · loop receipt", treat it as my chosen
+input and apply it to what you generated.</pre>
+  <p style="margin-top:18px"><a class="btn btn--ghost" href="https://github.com/sherifmak/claude-loop#readme" target="_blank" rel="noopener">Full docs &amp; the attribute reference →</a></p>
+</section>
+
+<footer class="wrap narrow">
+  <p>Built to go with the essay <a href="https://sheriff.substack.com" target="_blank" rel="noopener">“Personal software is already here”</a>
+  by Sherif Maktabi. The whole thing is one CSS file and one JS file — read them, fork them, make the loop your own.</p>
+  <p class="credit">claude-loop · MIT · github.com/sherifmak/claude-loop</p>
+</footer>
+
+<script src="loop.js" defer></script>
+</body>
+</html>

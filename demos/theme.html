@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme picker · claude-loop</title>
+<meta name="description" content="A live styling panel Claude handed you. Tune the accent, mode, type, radius and spacing — watch the preview update in real time — then tear off the CSS tokens.">
+<link rel="stylesheet" href="../loop.css">
+<style>
+  header.demo-head { padding: 64px 0 28px; }
+  header.demo-head .back { font-family:var(--mono); font-size:.78rem; letter-spacing:.08em;
+    text-decoration:none; color:var(--ink-soft); display:inline-block; margin-bottom:26px; }
+  header.demo-head .back:hover { color:var(--coral-deep); }
+  header.demo-head h1 { margin-top:.1em; font-size:clamp(2.2rem,6vw,3.6rem); }
+  header.demo-head .lead { max-width:46ch; }
+
+  .studio { display:grid; gap:22px; grid-template-columns:1fr; align-items:start;
+    padding-bottom:80px; }
+  @media (min-width:880px){ .studio{ grid-template-columns: 360px 1fr; } }
+
+  /* ---- control panel ---- */
+  .panel { background:var(--card); border:1.5px solid var(--ink); border-radius:var(--radius);
+    padding:24px; box-shadow:var(--shadow); }
+  .panel__title { font-family:var(--mono); font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--ink-faint); margin:0 0 18px; display:flex;
+    align-items:center; gap:.6em; }
+  .panel__title::before{ content:""; width:22px; height:1px; background:var(--coral); }
+
+  .ctrl { display:flex; flex-direction:column; gap:8px; padding:16px 0;
+    border-top:1.5px solid var(--line-soft); }
+  .ctrl:first-of-type { border-top:0; padding-top:0; }
+  .ctrl > .lbl { display:flex; justify-content:space-between; align-items:baseline;
+    font-weight:600; font-size:.92rem; gap:10px; }
+  .ctrl .val { font-family:var(--mono); font-size:.82rem; color:var(--coral-deep);
+    font-weight:500; }
+
+  .swatch { display:flex; align-items:center; gap:12px; }
+  input[type=color]{ -webkit-appearance:none; appearance:none; width:54px; height:38px;
+    padding:0; border:1.5px solid var(--ink); border-radius:9px; background:#fff; cursor:pointer; }
+  input[type=color]::-webkit-color-swatch-wrapper{ padding:3px; }
+  input[type=color]::-webkit-color-swatch{ border:0; border-radius:6px; }
+  input[type=color]::-moz-color-swatch{ border:0; border-radius:6px; }
+  .swatch code { font-family:var(--mono); font-size:.85rem; color:var(--ink-soft);
+    text-transform:uppercase; }
+
+  select { font-family:var(--ui); font-size:.95rem; padding:.55em .7em; width:100%;
+    border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); cursor:pointer; }
+  input[type=range]{ accent-color:var(--coral); width:100%; }
+
+  .chip-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ border:1.5px solid var(--ink); background:#fff; border-radius:100px; padding:.45em 1em;
+    font-weight:600; font-size:.85rem; cursor:pointer; font-family:var(--ui); color:var(--ink);
+    transition:transform .1s, box-shadow .1s; }
+  .chip:hover{ transform:translate(-1px,-1px); box-shadow:2px 2px 0 var(--line); }
+  .chip.is-active{ background:var(--coral); color:#fff; border-color:var(--coral); box-shadow:2px 2px 0 var(--ink); }
+
+  /* ---- live preview surface ---- */
+  .stage { display:flex; flex-direction:column; gap:12px; }
+  .stage__tag { font-family:var(--mono); font-size:.7rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-faint); display:flex; align-items:center; gap:.5em; }
+  .stage__tag .dot{ width:8px; height:8px; border-radius:50%; background:var(--coral);
+    box-shadow:0 0 0 3px var(--coral-wash); }
+
+  /* the preview owns its own CSS vars; controls rewrite them */
+  .preview {
+    --accent:#ff4d23;
+    --pv-bg:#fbf7ef;
+    --pv-ink:#1c1714;
+    --pv-soft:#5a5048;
+    --pv-line:#e0d6c5;
+    --pv-card:#ffffff;
+    --pv-radius:14px;
+    --pv-pad:26px;
+    --pv-font:'Hanken Grotesk', system-ui, sans-serif;
+    --pv-display:'Fraunces', Georgia, serif;
+    background:var(--pv-bg); color:var(--pv-ink);
+    border:1.5px solid var(--ink); border-radius:var(--radius);
+    padding:clamp(20px,4vw,40px); box-shadow:var(--shadow);
+    font-family:var(--pv-font);
+    transition:background .25s ease, color .25s ease;
+  }
+  .preview .kicker{ font-family:var(--pv-font); font-size:.72rem; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 12px; }
+  .preview h2.pv-title{ font-family:var(--pv-display); color:var(--pv-ink); line-height:1.05;
+    letter-spacing:-.02em; margin:0 0 .35em; font-size:clamp(1.6rem,4vw,2.2rem); }
+  .preview p.pv-body{ font-family:var(--pv-font); color:var(--pv-soft); max-width:46ch;
+    margin:0 0 22px; line-height:1.6; }
+
+  .preview .pv-card{ background:var(--pv-card); border:1.5px solid var(--pv-line);
+    border-radius:var(--pv-radius); padding:var(--pv-pad);
+    transition:border-radius .2s ease, padding .2s ease, background .25s ease, border-color .25s ease; }
+  .preview .pv-card .pv-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+  .preview .pv-eyebrow{ font-family:var(--pv-font); font-size:.7rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--pv-soft); margin:0 0 4px; }
+  .preview .pv-name{ font-family:var(--pv-display); font-weight:600; font-size:1.3rem;
+    margin:0 0 6px; color:var(--pv-ink); letter-spacing:-.01em; }
+  .preview .pv-desc{ font-family:var(--pv-font); font-size:.9rem; color:var(--pv-soft);
+    margin:0; line-height:1.55; max-width:34ch; }
+  .preview .pv-price{ font-family:var(--pv-display); font-weight:600; font-size:1.5rem;
+    color:var(--accent); white-space:nowrap; }
+  .preview .pv-actions{ display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+  .preview .pv-btn{ font-family:var(--pv-font); font-weight:700; font-size:.9rem; cursor:pointer;
+    border:1.5px solid var(--accent); border-radius:var(--pv-radius);
+    padding:.65em 1.2em; transition:border-radius .2s ease, transform .1s; }
+  .preview .pv-btn:hover{ transform:translateY(-1px); }
+  .preview .pv-btn--fill{ background:var(--accent); color:#fff; }
+  .preview .pv-btn--ghost{ background:transparent; color:var(--accent); }
+  .preview .pv-tags{ display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; }
+  .preview .pv-tag{ font-family:var(--pv-font); font-size:.72rem; font-weight:600;
+    padding:.3em .8em; border-radius:var(--pv-radius);
+    color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent);
+    transition:border-radius .2s ease; }
+
+  /* generated token readout */
+  .tokens { background:#1c1714; color:#f3ece0; font-family:var(--mono); font-size:.8rem;
+    line-height:1.65; padding:18px 20px; border-radius:12px; border:1.5px solid var(--ink);
+    overflow:auto; margin:0; }
+  .tokens .k{ color:#ffb38a; }
+  .tokens .c{ color:#9a8f80; }
+  .tokens-wrap .stage__tag{ margin-bottom:0; }
+</style>
+</head>
+<body>
+
+<header class="demo-head wrap narrow">
+  <a class="back" href="../index.html">← claude-loop</a>
+  <span class="eyebrow">demo · theme picker</span>
+  <h1>Style it live.</h1>
+  <p class="lead">Claude generated this for you. Make it yours, then tear off the receipt —
+  it hands back real <span class="mark">:root</span> tokens, ready to drop in.</p>
+</header>
+
+<div class="wrap studio">
+
+  <!-- ============ CONTROL PANEL ============ -->
+  <aside class="panel" data-loop-title="Theme picker">
+    <p class="panel__title">Styling controls</p>
+
+    <div class="ctrl">
+      <span class="lbl">Accent colour</span>
+      <div class="swatch">
+        <input type="color" id="accent" data-loop="Accent" value="#ff4d23"
+               aria-label="Accent colour">
+        <code id="accentHex">#FF4D23</code>
+      </div>
+    </div>
+
+    <div class="ctrl">
+      <span class="lbl">Mode</span>
+      <div class="chip-row" data-loop-decision="Mode">
+        <button type="button" class="chip is-active" data-loop-choice="Light">Light</button>
+        <button type="button" class="chip" data-loop-choice="Dark">Dark</button>
+      </div>
+    </div>
+
+    <div class="ctrl">
+      <span class="lbl"><label for="font">Font pairing</label></span>
+      <select id="font" data-loop="Font pairing">
+        <option value="fraunces-hanken">Fraunces + Hanken</option>
+        <option value="serif">Serif editorial</option>
+        <option value="grotesk">Grotesk modern</option>
+        <option value="mono">Mono everything</option>
+      </select>
+    </div>
+
+    <div class="ctrl">
+      <span class="lbl">Corner radius <span class="val" id="radiusVal">14px</span></span>
+      <input type="range" id="radius" data-loop="Radius" min="0" max="28" value="14"
+             aria-label="Corner radius">
+    </div>
+
+    <div class="ctrl">
+      <span class="lbl">Density / spacing <span class="val" id="spacingVal">50</span></span>
+      <input type="range" id="spacing" data-loop="Spacing" min="0" max="100" value="50"
+             aria-label="Density and spacing">
+    </div>
+  </aside>
+
+  <!-- ============ LIVE PREVIEW ============ -->
+  <div class="stage">
+    <p class="stage__tag"><span class="dot"></span> live preview — updates as you tune</p>
+
+    <div class="preview" id="preview">
+      <p class="kicker">New this season</p>
+      <h2 class="pv-title">Make the interface yours.</h2>
+      <p class="pv-body">This card re-styles itself the instant you move a control.
+      What you see is what Claude will ship.</p>
+
+      <div class="pv-card">
+        <div class="pv-row">
+          <div>
+            <p class="pv-eyebrow">Subscription</p>
+            <p class="pv-name">Studio plan</p>
+            <p class="pv-desc">Everything in Pro, plus live theming and one-click handoff back to chat.</p>
+          </div>
+          <span class="pv-price">$24</span>
+        </div>
+        <div class="pv-actions">
+          <button type="button" class="pv-btn pv-btn--fill">Choose plan</button>
+          <button type="button" class="pv-btn pv-btn--ghost">Preview</button>
+        </div>
+        <div class="pv-tags">
+          <span class="pv-tag">Live preview</span>
+          <span class="pv-tag">Tokens</span>
+          <span class="pv-tag">No setup</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tokens-wrap">
+      <p class="stage__tag" style="margin:4px 0 10px">generated css — goes back in the receipt</p>
+      <pre class="tokens" id="tokens" aria-live="polite"></pre>
+    </div>
+  </div>
+
+</div>
+
+<script src="../loop.js"></script>
+<script>
+(function () {
+  Loop.config({ title: 'Theme picker' });
+
+  var preview   = document.getElementById('preview');
+  var accent    = document.getElementById('accent');
+  var accentHex = document.getElementById('accentHex');
+  var font      = document.getElementById('font');
+  var radius    = document.getElementById('radius');
+  var radiusVal = document.getElementById('radiusVal');
+  var spacing   = document.getElementById('spacing');
+  var spacingVal= document.getElementById('spacingVal');
+  var tokensEl  = document.getElementById('tokens');
+  var modeGroup = document.querySelector('[data-loop-decision="Mode"]');
+
+  // Mode palettes (drives preview bg + text live)
+  var MODES = {
+    Light: { bg:'#fbf7ef', ink:'#1c1714', soft:'#5a5048', line:'#e0d6c5', card:'#ffffff' },
+    Dark:  { bg:'#1c1714', ink:'#f6efe2', soft:'#bdb2a3', line:'#3a332c', card:'#262019' }
+  };
+
+  // Font pairings (display heading / body) — only fonts already loaded by loop.css
+  var FONTS = {
+    'fraunces-hanken': {
+      display: "'Fraunces', Georgia, serif",
+      body:    "'Hanken Grotesk', system-ui, sans-serif",
+      name: 'Fraunces + Hanken'
+    },
+    'serif': {
+      display: "'Fraunces', Georgia, serif",
+      body:    "'Fraunces', Georgia, serif",
+      name: 'Serif editorial'
+    },
+    'grotesk': {
+      display: "'Hanken Grotesk', system-ui, sans-serif",
+      body:    "'Hanken Grotesk', system-ui, sans-serif",
+      name: 'Grotesk modern'
+    },
+    'mono': {
+      display: "'JetBrains Mono', ui-monospace, monospace",
+      body:    "'JetBrains Mono', ui-monospace, monospace",
+      name: 'Mono everything'
+    }
+  };
+
+  function currentMode() {
+    var active = modeGroup.querySelector('.is-active');
+    return active ? active.getAttribute('data-loop-choice') : 'Light';
+  }
+
+  function pad(spaceVal) {
+    // 0 → 14px (tight), 100 → 40px (airy)
+    return Math.round(14 + (spaceVal / 100) * 26);
+  }
+
+  function render() {
+    var hex   = accent.value;
+    var mode  = currentMode();
+    var pal   = MODES[mode] || MODES.Light;
+    var pair  = FONTS[font.value] || FONTS['fraunces-hanken'];
+    var rad   = parseInt(radius.value, 10);
+    var space = parseInt(spacing.value, 10);
+    var padPx = pad(space);
+
+    // live preview vars
+    preview.style.setProperty('--accent', hex);
+    preview.style.setProperty('--pv-bg', pal.bg);
+    preview.style.setProperty('--pv-ink', pal.ink);
+    preview.style.setProperty('--pv-soft', pal.soft);
+    preview.style.setProperty('--pv-line', pal.line);
+    preview.style.setProperty('--pv-card', pal.card);
+    preview.style.setProperty('--pv-radius', rad + 'px');
+    preview.style.setProperty('--pv-pad', padPx + 'px');
+    preview.style.setProperty('--pv-display', pair.display);
+    preview.style.setProperty('--pv-font', pair.body);
+
+    // readouts
+    accentHex.textContent = hex.toUpperCase();
+    radiusVal.textContent = rad + 'px';
+    spacingVal.textContent = space + (space < 34 ? ' · tight' : space > 66 ? ' · airy' : ' · balanced');
+
+    // ready-to-paste token block
+    var css =
+      ':root {\n' +
+      '  --accent: ' + hex.toLowerCase() + ';\n' +
+      '  --mode: ' + mode.toLowerCase() + ';\n' +
+      '  --bg: ' + pal.bg + ';\n' +
+      '  --text: ' + pal.ink + ';\n' +
+      '  --text-soft: ' + pal.soft + ';\n' +
+      '  --border: ' + pal.line + ';\n' +
+      '  --surface: ' + pal.card + ';\n' +
+      '  --radius: ' + rad + 'px;\n' +
+      '  --pad: ' + padPx + 'px;\n' +
+      '  --font-display: ' + pair.display + ';\n' +
+      '  --font-body: ' + pair.body + ';\n' +
+      '}';
+
+    // syntax-tint the on-page readout
+    tokensEl.innerHTML = css
+      .replace(/(--[\w-]+)(:)/g, '<span class="k">$1</span>$2');
+
+    // hand the raw CSS to the receipt
+    Loop.value('CSS tokens', '\n' + css);
+  }
+
+  // wire every control
+  accent.addEventListener('input', render);
+  font.addEventListener('change', render);
+  radius.addEventListener('input', render);
+  spacing.addEventListener('input', render);
+  // mode chips: loop.js toggles .is-active on click; re-render just after
+  modeGroup.addEventListener('click', function (e) {
+    if (e.target.closest('[data-loop-choice]')) setTimeout(render, 0);
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

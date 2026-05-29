@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan reviewer · claude-loop</title>
+<link rel="stylesheet" href="../loop.css">
+<style>
+  header.head { padding: 72px 0 30px; }
+  .backlink { font-family: var(--mono); font-size: .78rem; letter-spacing: .08em;
+    text-transform: uppercase; text-decoration: none; display: inline-block; margin-bottom: 28px; }
+  .backlink:hover { text-decoration: underline; }
+  .head h1 { margin-top: .12em; font-size: clamp(2.3rem, 6vw, 3.6rem); }
+  .frame { color: var(--ink-soft); font-size: 1.05rem; max-width: 52ch; }
+
+  .plan { margin: 8px 0 40px; }
+
+  /* the step list */
+  ol.steps { list-style: none; margin: 0 0 18px; padding: 0; counter-reset: step; }
+  li.step {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: start;
+    gap: 12px;
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: transform .12s ease, box-shadow .12s ease, opacity .15s, background .15s;
+  }
+  li.step.dragging { opacity: .55; box-shadow: 5px 6px 0 var(--coral); cursor: grabbing; }
+  li.step.over { transform: translateY(2px); box-shadow: -2px 6px 0 var(--coral); }
+  li.step.removed { background: var(--paper-2); }
+  li.step.removed .step__text { text-decoration: line-through; color: var(--ink-faint); }
+  li.step.removed .step__num { opacity: .4; }
+
+  .step__handle {
+    font-family: var(--mono); font-size: 1.25rem; line-height: 1.4;
+    color: var(--ink-faint); cursor: grab; user-select: none;
+    align-self: center; padding: 0 2px;
+  }
+  .step__handle:active { cursor: grabbing; }
+
+  .step__check { display: flex; align-items: center; padding-top: 3px; }
+  .step__check input[type=checkbox] {
+    width: 20px; height: 20px; accent-color: var(--coral); cursor: pointer; margin: 0;
+  }
+
+  .step__body { min-width: 0; }
+  .step__num {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .12em;
+    color: var(--coral-deep); font-weight: 700; display: block; margin-bottom: 2px;
+  }
+  .step__num::before { content: "STEP " counter(step); }
+  .step__text {
+    font-family: var(--ui); font-size: 1rem; line-height: 1.5; color: var(--ink);
+    outline: none; border-radius: 6px; padding: 2px 4px; margin: 0 -4px;
+  }
+  .step__text:focus { background: var(--coral-wash); box-shadow: 0 0 0 1.5px var(--coral); }
+
+  .step__moves { display: flex; flex-direction: column; gap: 4px; align-self: center; }
+  .imove {
+    font-family: var(--mono); font-size: .9rem; line-height: 1;
+    width: 28px; height: 24px; border: 1.5px solid var(--line);
+    background: #fff; color: var(--ink); border-radius: 7px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: border-color .12s, background .12s;
+  }
+  .imove:hover:not(:disabled) { border-color: var(--ink); background: var(--coral-wash); }
+  .imove:disabled { opacity: .3; cursor: not-allowed; }
+  .imove:focus-visible { outline: 2px solid var(--coral); outline-offset: 1px; }
+
+  .addbtn {
+    font-family: var(--ui); font-weight: 600; font-size: .92rem;
+    border: 1.5px dashed var(--ink); background: transparent; color: var(--ink);
+    padding: .65em 1.1em; border-radius: 100px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: .5em;
+    transition: background .15s, box-shadow .12s, transform .12s;
+  }
+  .addbtn:hover { background: var(--coral-wash); box-shadow: 3px 3px 0 var(--coral); transform: translate(-1px,-1px); }
+
+  /* decision + note panel */
+  .verdict { margin-top: 36px; border-top: 1.5px solid var(--line); padding-top: 30px; }
+  .verdict .qline {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 12px;
+  }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
+  .chip {
+    border: 1.5px solid var(--ink); background: #fff; border-radius: 100px;
+    padding: .5em 1.1em; font-weight: 600; font-size: .92rem; cursor: pointer;
+    font-family: var(--ui); color: var(--ink); transition: background .12s, color .12s, box-shadow .12s;
+  }
+  .chip:hover { box-shadow: 3px 3px 0 var(--coral); }
+  .chip.is-active { background: var(--coral); color: #fff; border-color: var(--coral); }
+  .chip:focus-visible { outline: 2px solid var(--coral-deep); outline-offset: 2px; }
+
+  .note label { font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 10px; }
+  textarea.note__box {
+    width: 100%; min-height: 92px; resize: vertical; font-family: var(--ui);
+    font-size: 1rem; line-height: 1.55; color: var(--ink); padding: 14px 16px;
+    border: 1.5px solid var(--ink); border-radius: var(--radius); background: var(--card);
+    box-shadow: var(--shadow);
+  }
+  textarea.note__box:focus { outline: none; box-shadow: 3px 3px 0 var(--coral); }
+
+  @media (max-width: 560px) {
+    li.step { grid-template-columns: auto 1fr auto; }
+    .step__check { grid-row: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="head wrap narrow">
+  <a class="backlink" href="../index.html">← claude-loop</a>
+  <span class="eyebrow">demo · plan reviewer</span>
+  <h1>Launch the new marketing site</h1>
+  <p class="frame">Claude generated this for you. Reorder the steps, edit the wording, drop what you don't want — then tear off the receipt.</p>
+</header>
+
+<main class="wrap narrow plan">
+  <ol class="steps" id="steps" data-loop-order="Step order">
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">Audit the current site and pull together brand, copy, and asset requirements</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">Wireframe the home, pricing, and about pages and review with the team</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">Design the high-fidelity pages in Figma and lock the visual system</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">Build the pages as responsive components and wire up the CMS</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">QA across browsers and devices, then set up analytics and SEO metadata</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+    <li class="step" draggable="true" data-loop-item>
+      <span class="step__handle" aria-hidden="true">⠿</span>
+      <span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>
+      <span class="step__body">
+        <span class="step__num"></span>
+        <span class="step__text" data-loop-text contenteditable="true">Cut over the DNS, launch, and announce on email and social</span>
+      </span>
+      <span class="step__moves">
+        <button type="button" class="imove up" aria-label="Move step up">↑</button>
+        <button type="button" class="imove down" aria-label="Move step down">↓</button>
+      </span>
+    </li>
+  </ol>
+
+  <button type="button" class="addbtn" id="addStep">+ Add step</button>
+
+  <section class="verdict">
+    <p class="qline">Your call on this plan</p>
+    <div class="chip-row" data-loop-decision="Decision">
+      <button type="button" class="chip is-active" data-loop-choice="Approve">Approve</button>
+      <button type="button" class="chip" data-loop-choice="Revise">Revise</button>
+      <button type="button" class="chip" data-loop-choice="Start over">Start over</button>
+    </div>
+
+    <div class="note">
+      <label for="note">Note to Claude</label>
+      <textarea id="note" class="note__box" data-loop="Note to Claude" placeholder="anything else..."></textarea>
+    </div>
+  </section>
+</main>
+
+<script src="../loop.js"></script>
+<script>
+  Loop.config({ title: 'Plan reviewer' });
+
+  var list = document.getElementById('steps');
+
+  /* ---------- removed-row dimming ---------- */
+  function syncRow(li) {
+    var cb = li.querySelector('[data-loop-toggle]');
+    li.classList.toggle('removed', !cb.checked);
+  }
+
+  /* ---------- enable/disable up/down at the ends ---------- */
+  function refreshMoves() {
+    var rows = Array.prototype.slice.call(list.querySelectorAll('li.step'));
+    rows.forEach(function (li, i) {
+      li.querySelector('.imove.up').disabled = (i === 0);
+      li.querySelector('.imove.down').disabled = (i === rows.length - 1);
+    });
+  }
+
+  /* ---------- wire a single row ---------- */
+  function wire(li) {
+    var cb = li.querySelector('[data-loop-toggle]');
+    cb.addEventListener('change', function () { syncRow(li); });
+    syncRow(li);
+
+    li.querySelector('.imove.up').addEventListener('click', function () {
+      var prev = li.previousElementSibling;
+      if (prev) { list.insertBefore(li, prev); refreshMoves(); li.querySelector('.imove.up').focus(); }
+    });
+    li.querySelector('.imove.down').addEventListener('click', function () {
+      var next = li.nextElementSibling;
+      if (next) { list.insertBefore(next, li); refreshMoves(); li.querySelector('.imove.down').focus(); }
+    });
+
+    /* drag-to-reorder */
+    li.addEventListener('dragstart', function (e) {
+      dragEl = li;
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+    });
+    li.addEventListener('dragend', function () {
+      li.classList.remove('dragging');
+      Array.prototype.forEach.call(list.querySelectorAll('.over'), function (n) { n.classList.remove('over'); });
+      refreshMoves();
+    });
+    li.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!dragEl || dragEl === li) return;
+      var rect = li.getBoundingClientRect();
+      var after = (e.clientY - rect.top) > rect.height / 2;
+      li.classList.add('over');
+      if (after) { list.insertBefore(dragEl, li.nextElementSibling); }
+      else { list.insertBefore(dragEl, li); }
+    });
+    li.addEventListener('dragleave', function () { li.classList.remove('over'); });
+    li.addEventListener('drop', function (e) { e.preventDefault(); li.classList.remove('over'); });
+  }
+
+  var dragEl = null;
+
+  Array.prototype.forEach.call(list.querySelectorAll('li.step'), wire);
+  refreshMoves();
+
+  /* ---------- add step ---------- */
+  document.getElementById('addStep').addEventListener('click', function () {
+    var li = document.createElement('li');
+    li.className = 'step';
+    li.setAttribute('draggable', 'true');
+    li.setAttribute('data-loop-item', '');
+    li.innerHTML =
+      '<span class="step__handle" aria-hidden="true">⠿</span>' +
+      '<span class="step__check"><input type="checkbox" data-loop-toggle checked aria-label="Keep this step"></span>' +
+      '<span class="step__body">' +
+        '<span class="step__num"></span>' +
+        '<span class="step__text" data-loop-text contenteditable="true">New step — describe it</span>' +
+      '</span>' +
+      '<span class="step__moves">' +
+        '<button type="button" class="imove up" aria-label="Move step up">↑</button>' +
+        '<button type="button" class="imove down" aria-label="Move step down">↓</button>' +
+      '</span>';
+    list.appendChild(li);
+    wire(li);
+    refreshMoves();
+    var txt = li.querySelector('.step__text');
+    txt.focus();
+    var r = document.createRange();
+    r.selectNodeContents(txt);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  });
+</script>
+</body>
+</html>
